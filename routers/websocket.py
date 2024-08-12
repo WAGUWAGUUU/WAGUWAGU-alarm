@@ -4,7 +4,6 @@ from fastapi.responses import FileResponse
 from utils.tts import generate_tts
 import os
 import logging
-from json.decoder import JSONDecodeError
 
 router = APIRouter()
 
@@ -29,7 +28,6 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: 
 async def notify(request: Request):
     customer_file_path = None
     try:
-        # 요청 본문을 JSON으로 파싱
         try:
             data = await request.json()
         except Exception as e:
@@ -43,31 +41,18 @@ async def notify(request: Request):
 
         logger.info(f"Received notify request for store_id: {store_id}")
 
-        # TTS 파일 생성
         customer_message = "주문이 완료되었습니다."
         customer_file_path = generate_tts(customer_message)
-        print(customer_file_path)
-        if not customer_file_path or not os.path.exists(customer_file_path):
+        logger.info(f"Generated TTS file path: {customer_file_path}")
+
+        if not os.path.exists(customer_file_path):
             logger.error(f"Failed to generate TTS or file does not exist: {customer_file_path}")
             raise HTTPException(status_code=500, detail="TTS file was not created successfully.")
 
-        # 파일 응답
         response = FileResponse(customer_file_path, media_type='audio/mpeg', filename=os.path.basename(customer_file_path))
-
-        # 파일 삭제는 응답 후에 이루어집니다.
-        response.headers["Content-Disposition"] = f"attachment; filename={os.path.basename(customer_file_path)}"
 
         return response
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
-    finally:
-        # 파일 삭제
-        if customer_file_path and os.path.exists(customer_file_path):
-            try:
-                os.remove(customer_file_path)
-                logger.info(f"File deleted: {customer_file_path}")
-            except Exception as e:
-                logger.error(f"Error deleting file: {e}")
