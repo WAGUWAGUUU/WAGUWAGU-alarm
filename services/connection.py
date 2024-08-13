@@ -5,7 +5,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class ConnectionManager:
     def __init__(self):
         self.customer_connections: Dict[str, List[WebSocket]] = {}
@@ -29,7 +28,6 @@ class ConnectionManager:
 
         # 로그 추가
         logger.info(f"Connected {client_type} with ID {client_id}. Total connections: {len(self.store_connections.get(client_id, []))}")
-
 
     def disconnect(self, websocket: WebSocket, client_type: str, client_id: str):
         if client_type == "customer" and client_id in self.customer_connections:
@@ -56,6 +54,12 @@ class ConnectionManager:
 
         for connection in connections:
             await connection.send_text(message)
+
+    async def send_personal_message(self, data: bytes, client_id: str):
+        """특정 store_id에 대한 WebSocket 연결에 바이너리 데이터를 전송"""
+        if client_id in self.store_connections:
+            for connection in self.store_connections[client_id]:
+                await connection.send_bytes(data)
 
     def is_connected(self, client_type: str, client_id: str) -> bool:
         """클라이언트가 현재 연결되어 있는지 확인"""

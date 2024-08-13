@@ -43,6 +43,9 @@ async def notify(request: Request):
         customer_file_path = generate_tts(customer_message)
         logger.info(f"Generated TTS file path: {customer_file_path}")
 
+        store_message = "주문이 접수되었습니다."
+        store_file_path = generate_tts(store_message)
+
         # 파일 존재 여부 확인
         if not os.path.exists(customer_file_path):
             logger.error(f"TTS file does not exist: {customer_file_path}")
@@ -50,6 +53,11 @@ async def notify(request: Request):
 
         # 파일 반환
         response = FileResponse(customer_file_path, media_type='audio/mpeg', filename=os.path.basename(customer_file_path))
+
+        with open(store_file_path, "rb") as audio_file:
+            audio_data = audio_file.read()
+            await manager.send_personal_message(audio_data, f"store_{store_id}")
+
         return response
 
     except HTTPException as http_error:
