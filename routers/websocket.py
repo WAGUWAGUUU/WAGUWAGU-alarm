@@ -26,14 +26,11 @@ async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: 
 
 @router.post("/notify")
 async def notify(request: Request):
-    customer_file_path = None
     try:
-        try:
-            data = await request.json()
-        except Exception as e:
-            logger.error(f"Error parsing JSON: {e}")
-            raise HTTPException(status_code=400, detail="Invalid JSON format")
+        # JSON 데이터 파싱
+        data = await request.json()
 
+        # 'store_id' 확인
         store_id = data.get('store_id')
         if not store_id:
             logger.error("Missing 'store_id' in request data")
@@ -41,17 +38,23 @@ async def notify(request: Request):
 
         logger.info(f"Received notify request for store_id: {store_id}")
 
+        # TTS 파일 생성
         customer_message = "주문이 완료되었습니다."
         customer_file_path = generate_tts(customer_message)
         logger.info(f"Generated TTS file path: {customer_file_path}")
 
+        # 파일 존재 여부 확인
         if not os.path.exists(customer_file_path):
-            logger.error(f"Failed to generate TTS or file does not exist: {customer_file_path}")
+            logger.error(f"TTS file does not exist: {customer_file_path}")
             raise HTTPException(status_code=500, detail="TTS file was not created successfully.")
 
+        # 파일 반환
         response = FileResponse(customer_file_path, media_type='audio/mpeg', filename=os.path.basename(customer_file_path))
-
         return response
+
+    except HTTPException as http_error:
+        logger.error(f"HTTPException: {http_error.detail}")
+        raise http_error
 
     except Exception as e:
         logger.error(f"An error occurred: {e}")
