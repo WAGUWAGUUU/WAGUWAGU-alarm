@@ -12,18 +12,6 @@ manager = ConnectionManager()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# @router.websocket("/ws/{client_type}/{client_id}")
-# async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str):
-#     await manager.connect(websocket, client_type, client_id)
-#     logger.info(f"WebSocket connection open for {client_type} with ID {client_id}")
-#     try:
-#         while True:
-#             message = await websocket.receive_text()  # 클라이언트로부터 메시지를 수신
-#             logger.info(f"Received message from {client_type} {client_id}: {message}")
-#             # 여기서 수신된 메시지를 기반으로 추가 처리할 수 있습니다
-#     except WebSocketDisconnect:
-#         manager.disconnect(websocket, client_type, client_id)
-#         logger.info(f"WebSocket connection closed for {client_type} with ID {client_id}")
 @router.websocket("/ws/{client_type}/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str):
     await manager.connect(websocket, client_type, client_id)
