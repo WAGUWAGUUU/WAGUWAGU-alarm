@@ -9,6 +9,7 @@ origins = [
     "http://localhost",
     "http://192.168.0.15:8081",  # React 개발 서버의 기본 포트
     "http://192.168.0.15:5173",  # Expo 개발 서버의 기본 포트
+    "http://localhost:5173",  # Expo 개발 서버의 기본 포트
     # 필요한 경우 다른 출처도 추가 가능
 ]
 
