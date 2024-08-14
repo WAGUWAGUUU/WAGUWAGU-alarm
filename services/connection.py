@@ -43,6 +43,17 @@ class ConnectionManager:
             if not self.driver_connections[client_id]:  # 리스트가 비어 있으면
                 del self.driver_connections[client_id]  # 해당 ID 삭제
 
+    # async def send_message(self, message: str, client_type: str, client_id: str):
+    #     connections = []
+    #     if client_type == "customer" and client_id in self.customer_connections:
+    #         connections = self.customer_connections[client_id]
+    #     elif client_type == "store" and client_id in self.store_connections:
+    #         connections = self.store_connections[client_id]
+    #     elif client_type == "rider" and client_id in self.driver_connections:
+    #         connections = self.driver_connections[client_id]
+    #
+    #     for connection in connections:
+    #         await connection.send_text(message)
     async def send_message(self, message: str, client_type: str, client_id: str):
         connections = []
         if client_type == "customer" and client_id in self.customer_connections:
@@ -53,13 +64,12 @@ class ConnectionManager:
             connections = self.driver_connections[client_id]
 
         for connection in connections:
-            await connection.send_text(message)
+            try:
+                await connection.send_text(message)
+                logger.info(f"Message sent to {client_type} with ID {client_id}: {message}")
+            except Exception as e:
+                logger.error(f"Failed to send message to {client_type} with ID {client_id}: {e}")
 
-    async def send_personal_message(self, data: bytes, client_id: str):
-        """특정 store_id에 대한 WebSocket 연결에 바이너리 데이터를 전송"""
-        if client_id in self.store_connections:
-            for connection in self.store_connections[client_id]:
-                await connection.send_bytes(data)
 
     def is_connected(self, client_type: str, client_id: str) -> bool:
         """클라이언트가 현재 연결되어 있는지 확인"""
