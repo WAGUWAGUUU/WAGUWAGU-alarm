@@ -5,12 +5,13 @@ from utils.tts import generate_tts
 import os
 import logging
 
-router = APIRouter()
+router = APIRouter(prefix="/alarm")
 
 manager = ConnectionManager()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 status_messages = {
     "order-received": "주문이 접수되었습니다.",

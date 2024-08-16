@@ -7,6 +7,7 @@ app = FastAPI()
 # CORS 설정 추가
 origins = [
     "http://localhost",
+    "http://192.168.28.135",
     "http://192.168.0.15:8081",  # React 개발 서버의 기본 포트
     "http://192.168.0.15:5173",  # Expo 개발 서버의 기본 포트
     "http://localhost:5173",  # Expo 개발 서버의 기본 포트
@@ -23,6 +24,10 @@ app.add_middleware(
 # 웹소켓 라우터 포함
 app.include_router(websocket_router)
 
+@app.get("/alarm")
+async def read_root():
+    return {"message": "Welcome to the FastAPI application"}
+
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run(app=app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
